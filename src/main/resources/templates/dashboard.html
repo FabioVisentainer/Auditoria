@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Sistema de Auditoria</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/css/globals.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-background text-foreground">
+<div th:replace="layout :: nav"></div>
+
+<main class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-foreground">Dashboard de Auditoria</h1>
+        <p class="mt-2 text-muted-foreground">Visão geral do sistema de auditoria de qualidade</p>
+    </div>
+
+    <!-- Métricas Principais -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="audit-card p-6">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="w-8 h-8 bg-primary rounded-md flex items-center justify-center">
+                        <svg class="w-5 h-5 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="ml-5 w-0 flex-1">
+                    <dl>
+                        <dt class="text-sm font-medium text-muted-foreground truncate">Auditorias Concluídas</dt>
+                        <dd class="text-lg font-medium text-card-foreground" th:text="${auditoriasConcluidas}">24</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <div class="audit-card p-6">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="w-8 h-8 bg-secondary rounded-md flex items-center justify-center">
+                        <svg class="w-5 h-5 text-secondary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="ml-5 w-0 flex-1">
+                    <dl>
+                        <dt class="text-sm font-medium text-muted-foreground truncate">Em Andamento</dt>
+                        <dd class="text-lg font-medium text-card-foreground" th:text="${auditoriasAndamento}">8</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <div class="audit-card p-6">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="w-8 h-8 bg-destructive rounded-md flex items-center justify-center">
+                        <svg class="w-5 h-5 text-destructive-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="ml-5 w-0 flex-1">
+                    <dl>
+                        <dt class="text-sm font-medium text-muted-foreground truncate">Não Conformidades</dt>
+                        <dd class="text-lg font-medium text-card-foreground" th:text="${naoConformidades}">12</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <div class="audit-card p-6">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="w-8 h-8 bg-accent rounded-md flex items-center justify-center">
+                        <svg class="w-5 h-5 text-accent-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="ml-5 w-0 flex-1">
+                    <dl>
+                        <dt class="text-sm font-medium text-muted-foreground truncate">% Aderência Média</dt>
+                        <dd class="text-lg font-medium text-card-foreground" th:text="${aderenciaMedia + '%'}">87%</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráficos e Tabelas -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Gráfico de Aderência -->
+        <div class="audit-card p-6">
+            <h3 class="text-lg font-medium text-card-foreground mb-4">Evolução da Aderência</h3>
+            <canvas id="aderenciaChart" width="400" height="200"></canvas>
+        </div>
+
+        <!-- Gráfico de Status das Auditorias -->
+        <div class="audit-card p-6">
+            <h3 class="text-lg font-medium text-card-foreground mb-4">Status das Auditorias</h3>
+            <canvas id="statusChart" width="400" height="200"></canvas>
+        </div>
+    </div>
+
+    <!-- Auditorias Recentes -->
+    <div class="mt-8">
+        <div class="audit-card">
+            <div class="px-6 py-4 border-b border-border">
+                <h3 class="text-lg font-medium text-card-foreground">Auditorias Recentes</h3>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="audit-table">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Processo</th>
+                        <th>Auditor</th>
+                        <th>Data</th>
+                        <th>Status</th>
+                        <th>Aderência</th>
+                        <th>Ações</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="auditoria : ${auditoriasRecentes}">
+                        <td th:text="${auditoria.id}">#001</td>
+                        <td th:text="${auditoria.processo}">Processo de Compras</td>
+                        <td th:text="${auditoria.auditor}">João Silva</td>
+                        <td th:text="${#dates.format(auditoria.data, 'dd/MM/yyyy')}">15/03/2024</td>
+                        <td>
+                                    <span class="status-badge"
+                                          th:classappend="${auditoria.status == 'CONCLUIDA'} ? 'status-approved' :
+                                                         (${auditoria.status == 'EM_ANDAMENTO'} ? 'status-in-progress' : 'status-pending')"
+                                          th:text="${auditoria.status}">Concluída</span>
+                        </td>
+                        <td th:text="${auditoria.aderencia + '%'}">92%</td>
+                        <td>
+                            <a th:href="@{/auditorias/{id}(id=${auditoria.id})}"
+                               class="text-primary hover:text-primary/80 text-sm font-medium">Ver Detalhes</a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    // Gráfico de Aderência
+    const aderenciaCtx = document.getElementById('aderenciaChart').getContext('2d');
+    new Chart(aderenciaCtx, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
+            datasets: [{
+                label: 'Aderência (%)',
+                data: [85, 87, 89, 86, 90, 87],
+                borderColor: 'rgb(22, 78, 99)',
+                backgroundColor: 'rgba(22, 78, 99, 0.1)',
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100
+                }
+            }
+        }
+    });
+
+    // Gráfico de Status
+    const statusCtx = document.getElementById('statusChart').getContext('2d');
+    new Chart(statusCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Concluídas', 'Em Andamento', 'Pendentes'],
+            datasets: [{
+                data: [24, 8, 3],
+                backgroundColor: [
+                    'rgb(22, 78, 99)',
+                    'rgb(8, 145, 178)',
+                    'rgb(236, 72, 153)'
+                ]
+            }]
+        },
+        options: {
+            responsive: true
+        }
+    });
+</script>
+</body>
+</html>

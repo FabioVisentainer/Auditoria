@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Não Conformidades - Sistema de Auditoria</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/css/globals.css">
+  <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+</head>
+<body class="bg-background text-foreground">
+<div th:replace="layout :: nav"></div>
+
+<main class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+  <!-- Header -->
+  <div class="flex justify-between items-center mb-8">
+    <div>
+      <h1 class="text-3xl font-bold text-foreground">Não Conformidades</h1>
+      <p class="mt-2 text-muted-foreground">Gerencie e acompanhe todas as não conformidades</p>
+    </div>
+    <a href="/nao-conformidades/nova" class="audit-btn-primary">
+      <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+      </svg>
+      Nova NC
+    </a>
+  </div>
+
+  <!-- Estatísticas -->
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+    <div class="audit-card p-6">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <div class="w-8 h-8 bg-destructive rounded-md flex items-center justify-center">
+            <svg class="w-5 h-5 text-destructive-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="ml-5 w-0 flex-1">
+          <dl>
+            <dt class="text-sm font-medium text-muted-foreground truncate">Total Abertas</dt>
+            <dd class="text-lg font-medium text-card-foreground" th:text="${totalAbertas}">15</dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+
+    <div class="audit-card p-6">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <div class="w-8 h-8 bg-yellow-500 rounded-md flex items-center justify-center">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="ml-5 w-0 flex-1">
+          <dl>
+            <dt class="text-sm font-medium text-muted-foreground truncate">Em Tratamento</dt>
+            <dd class="text-lg font-medium text-card-foreground" th:text="${emTratamento}">8</dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+
+    <div class="audit-card p-6">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <div class="w-8 h-8 bg-orange-500 rounded-md flex items-center justify-center">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="ml-5 w-0 flex-1">
+          <dl>
+            <dt class="text-sm font-medium text-muted-foreground truncate">Vencidas</dt>
+            <dd class="text-lg font-medium text-card-foreground" th:text="${vencidas}">3</dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+
+    <div class="audit-card p-6">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <div class="w-8 h-8 bg-primary rounded-md flex items-center justify-center">
+            <svg class="w-5 h-5 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="ml-5 w-0 flex-1">
+          <dl>
+            <dt class="text-sm font-medium text-muted-foreground truncate">Resolvidas</dt>
+            <dd class="text-lg font-medium text-card-foreground" th:text="${resolvidas}">42</dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="audit-card p-6 mb-6" x-data="{ showFilters: false }">
+    <div class="flex justify-between items-center">
+      <h3 class="text-lg font-medium text-card-foreground">Filtros</h3>
+      <button @click="showFilters = !showFilters" class="audit-btn-secondary">
+        <span x-text="showFilters ? 'Ocultar' : 'Mostrar'">Mostrar</span>
+      </button>
+    </div>
+
+    <div x-show="showFilters" class="mt-4 grid grid-cols-1 md:grid-cols-5 gap-4">
+      <div>
+        <label class="block text-sm font-medium text-card-foreground mb-2">Status</label>
+        <select class="audit-input w-full" name="status">
+          <option value="">Todos</option>
+          <option value="ABERTA">Aberta</option>
+          <option value="EM_TRATAMENTO">Em Tratamento</option>
+          <option value="RESOLVIDA">Resolvida</option>
+          <option value="FECHADA">Fechada</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-card-foreground mb-2">Criticidade</label>
+        <select class="audit-input w-full" name="criticidade">
+          <option value="">Todas</option>
+          <option value="BAIXA">Baixa</option>
+          <option value="MEDIA">Média</option>
+          <option value="ALTA">Alta</option>
+          <option value="CRITICA">Crítica</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-card-foreground mb-2">Processo</label>
+        <select class="audit-input w-full" name="processo">
+          <option value="">Todos</option>
+          <option value="COMPRAS">Compras</option>
+          <option value="VENDAS">Vendas</option>
+          <option value="PRODUCAO">Produção</option>
+          <option value="RH">Recursos Humanos</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-card-foreground mb-2">Responsável</label>
+        <select class="audit-input w-full" name="responsavel">
+          <option value="">Todos</option>
+          <option th:each="resp : ${responsaveis}"
+                  th:value="${resp.id}"
+                  th:text="${resp.nome}">João Silva</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-card-foreground mb-2">Vencimento</label>
+        <select class="audit-input w-full" name="vencimento">
+          <option value="">Todos</option>
+          <option value="VENCIDAS">Vencidas</option>
+          <option value="VENCE_HOJE">Vence Hoje</option>
+          <option value="VENCE_SEMANA">Vence na Semana</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lista de Não Conformidades -->
+  <div class="audit-card">
+    <div class="overflow-x-auto">
+      <table class="audit-table">
+        <thead>
+        <tr>
+          <th>ID</th>
+          <th>Descrição</th>
+          <th>Processo</th>
+          <th>Criticidade</th>
+          <th>Responsável</th>
+          <th>Data Abertura</th>
+          <th>Prazo</th>
+          <th>Status</th>
+          <th>Ações</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="nc : ${naoConformidades}">
+          <td>
+            <a th:href="@{/nao-conformidades/{id}(id=${nc.id})}"
+               class="text-primary hover:text-primary/80 font-medium"
+               th:text="'NC-' + ${nc.id}">NC-001</a>
+          </td>
+          <td>
+            <div class="max-w-xs">
+              <p class="truncate" th:text="${nc.descricao}">Procedimento não seguido conforme documentação</p>
+              <p class="text-xs text-muted-foreground" th:text="'Auditoria: ' + ${nc.auditoria.id}">Auditoria: #001</p>
+            </div>
+          </td>
+          <td th:text="${nc.processo}">Compras</td>
+          <td>
+                                <span class="status-badge"
+                                      th:classappend="${nc.criticidade == 'CRITICA'} ? 'bg-red-100 text-red-800' :
+                                                     (${nc.criticidade == 'ALTA'} ? 'bg-orange-100 text-orange-800' :
+                                                     (${nc.criticidade == 'MEDIA'} ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'))"
+                                      th:text="${nc.criticidade}">Alta</span>
+          </td>
+          <td th:text="${nc.responsavel}">Maria Santos</td>
+          <td th:text="${#dates.format(nc.dataAbertura, 'dd/MM/yyyy')}">15/03/2024</td>
+          <td>
+                                <span th:text="${#dates.format(nc.prazo, 'dd/MM/yyyy')}"
+                                      th:classappend="${#dates.createNow().after(nc.prazo)} ? 'text-destructive font-medium' :
+                                                     (${#temporals.between(#dates.createNow(), nc.prazo).toDays() <= 3} ? 'text-orange-600 font-medium' : '')">
+                                    25/03/2024
+                                </span>
+          </td>
+          <td>
+                                <span class="status-badge"
+                                      th:classappend="${nc.status == 'RESOLVIDA'} ? 'status-approved' :
+                                                     (${nc.status == 'EM_TRATAMENTO'} ? 'status-in-progress' :
+                                                     (${nc.status == 'FECHADA'} ? 'bg-gray-100 text-gray-800' : 'status-pending'))"
+                                      th:text="${nc.status}">Em Tratamento</span>
+          </td>
+          <td>
+            <div class="flex space-x-2">
+              <a th:href="@{/nao-conformidades/{id}(id=${nc.id})}"
+                 class="text-primary hover:text-primary/80 text-sm">Ver</a>
+              <a th:href="@{/nao-conformidades/{id}/editar(id=${nc.id})}"
+                 class="text-secondary hover:text-secondary/80 text-sm"
+                 th:if="${nc.status != 'FECHADA'}">Editar</a>
+              <button class="text-accent hover:text-accent/80 text-sm"
+                      th:if="${nc.status == 'RESOLVIDA'}"
+                      @click="fecharNC(${nc.id})">Fechar</button>
+            </div>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Paginação -->
+  <div class="mt-6 flex justify-between items-center">
+    <div class="text-sm text-muted-foreground">
+      Mostrando <span th:text="${(page.number * page.size) + 1}">1</span> a
+      <span th:text="${(page.number * page.size) + page.numberOfElements}">10</span> de
+      <span th:text="${page.totalElements}">50</span> resultados
+    </div>
+    <div class="flex space-x-2">
+      <a th:href="@{/nao-conformidades(page=${page.number - 1})}"
+         th:if="${page.hasPrevious()}"
+         class="audit-btn-secondary">Anterior</a>
+      <a th:href="@{/nao-conformidades(page=${page.number + 1})}"
+         th:if="${page.hasNext()}"
+         class="audit-btn-secondary">Próxima</a>
+    </div>
+  </div>
+</main>
+
+<script>
+  function fecharNC(id) {
+    if (confirm('Tem certeza que deseja fechar esta não conformidade?')) {
+      fetch(`/nao-conformidades/${id}/fechar`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      }).then(() => {
+        location.reload();
+      });
+    }
+  }
+</script>
+</body>
+</html>

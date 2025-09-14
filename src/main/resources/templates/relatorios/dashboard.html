@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatórios - Sistema de Auditoria</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/css/globals.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+</head>
+<body class="bg-background text-foreground">
+<div th:replace="layout :: nav"></div>
+
+<main class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-foreground">Relatórios de Auditoria</h1>
+            <p class="mt-2 text-muted-foreground">Análises e indicadores de qualidade</p>
+        </div>
+        <div class="flex space-x-4">
+            <button class="audit-btn-secondary" onclick="exportarRelatorio()">
+                <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                Exportar PDF
+            </button>
+            <button class="audit-btn-primary" onclick="gerarRelatorio()">
+                <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                </svg>
+                Gerar Relatório
+            </button>
+        </div>
+    </div>
+
+    <!-- Filtros de Período -->
+    <div class="audit-card p-6 mb-8" x-data="{ periodo: 'mes' }">
+        <h3 class="text-lg font-medium text-card-foreground mb-4">Período de Análise</h3>
+        <div class="flex flex-wrap gap-4">
+            <div class="flex items-center space-x-2">
+                <input type="radio" id="semana" name="periodo" value="semana" x-model="periodo" class="text-primary focus:ring-primary">
+                <label for="semana" class="text-sm">Última Semana</label>
+            </div>
+            <div class="flex items-center space-x-2">
+                <input type="radio" id="mes" name="periodo" value="mes" x-model="periodo" class="text-primary focus:ring-primary">
+                <label for="mes" class="text-sm">Último Mês</label>
+            </div>
+            <div class="flex items-center space-x-2">
+                <input type="radio" id="trimestre" name="periodo" value="trimestre" x-model="periodo" class="text-primary focus:ring-primary">
+                <label for="trimestre" class="text-sm">Último Trimestre</label>
+            </div>
+            <div class="flex items-center space-x-2">
+                <input type="radio" id="ano" name="periodo" value="ano" x-model="periodo" class="text-primary focus:ring-primary">
+                <label for="ano" class="text-sm">Último Ano</label>
+            </div>
+            <div class="flex items-center space-x-2">
+                <input type="radio" id="personalizado" name="periodo" value="personalizado" x-model="periodo" class="text-primary focus:ring-primary">
+                <label for="personalizado" class="text-sm">Personalizado</label>
+            </div>
+        </div>
+
+        <div x-show="periodo === 'personalizado'" class="mt-4 flex space-x-4">
+            <div>
+                <label class="block text-sm font-medium text-card-foreground mb-2">Data Início</label>
+                <input type="date" class="audit-input" name="dataInicio">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-card-foreground mb-2">Data Fim</label>
+                <input type="date" class="audit-input" name="dataFim">
+            </div>
+        </div>
+    </div>
+
+    <!-- KPIs Principais -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="audit-card p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-muted-foreground">Aderência Média</p>
+                    <p class="text-2xl font-bold text-card-foreground" th:text="${kpis.aderenciaMedia + '%'}">87%</p>
+                    <p class="text-xs text-green-600">+2% vs período anterior</p>
+                </div>
+                <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
+                    <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <div class="audit-card p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-muted-foreground">Total de Auditorias</p>
+                    <p class="text-2xl font-bold text-card-foreground" th:text="${kpis.totalAuditorias}">32</p>
+                    <p class="text-xs text-blue-600">+5 vs período anterior</p>
+                </div>
+                <div class="w-12 h-12 bg-secondary/10 rounded-full flex items-center justify-center">
+                    <svg class="w-6 h-6 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <div class="audit-card p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-muted-foreground">NCs Abertas</p>
+                    <p class="text-2xl font-bold text-card-foreground" th:text="${kpis.ncsAbertas}">15</p>
+                    <p class="text-xs text-red-600">+3 vs período anterior</p>
+                </div>
+                <div class="w-12 h-12 bg-destructive/10 rounded-full flex items-center justify-center">
+                    <svg class="w-6 h-6 text-destructive" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <div class="audit-card p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-muted-foreground">Tempo Médio Resolução</p>
+                    <p class="text-2xl font-bold text-card-foreground" th:text="${kpis.tempoMedioResolucao}">8.5</p>
+                    <p class="text-xs text-muted-foreground">dias</p>
+                </div>
+                <div class="w-12 h-12 bg-accent/10 rounded-full flex items-center justify-center">
+                    <svg class="w-6 h-6 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráficos -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <!-- Evolução da Aderência -->
+        <div class="audit-card p-6">
+            <h3 class="text-lg font-medium text-card-foreground mb-4">Evolução da Aderência por Processo</h3>
+            <canvas id="aderenciaProcessoChart" width="400" height="300"></canvas>
+        </div>
+
+        <!-- Distribuição de NCs por Criticidade -->
+        <div class="audit-card p-6">
+            <h3 class="text-lg font-medium text-card-foreground mb-4">NCs por Criticidade</h3>
+            <canvas id="ncCriticidadeChart" width="400" height="300"></canvas>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <!-- Top Processos com Menor Aderência -->
+        <div class="audit-card p-6">
+            <h3 class="text-lg font-medium text-card-foreground mb-4">Processos com Menor Aderência</h3>
+            <div class="space-y-4">
+                <div th:each="processo : ${processosRisco}" class="flex items-center justify-between">
+                    <div class="flex-1">
+                        <p class="font-medium" th:text="${processo.nome}">Processo de Compras</p>
+                        <div class="w-full bg-muted rounded-full h-2 mt-1">
+                            <div class="bg-destructive h-2 rounded-full"
+                                 th:style="'width: ' + ${processo.aderencia} + '%'"></div>
+                        </div>
+                    </div>
+                    <span class="ml-4 text-sm font-medium" th:text="${processo.aderencia + '%'}">65%</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status das NCs -->
+        <div class="audit-card p-6">
+            <h3 class="text-lg font-medium text-card-foreground mb-4">Status das Não Conformidades</h3>
+            <canvas id="ncStatusChart" width="400" height="300"></canvas>
+        </div>
+    </div>
+
+    <!-- Tabela de Auditores -->
+    <div class="audit-card">
+        <div class="px-6 py-4 border-b border-border">
+            <h3 class="text-lg font-medium text-card-foreground">Performance dos Auditores</h3>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="audit-table">
+                <thead>
+                <tr>
+                    <th>Auditor</th>
+                    <th>Auditorias Realizadas</th>
+                    <th>Aderência Média</th>
+                    <th>NCs Identificadas</th>
+                    <th>Tempo Médio</th>
+                    <th>Avaliação</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="auditor : ${performanceAuditores}">
+                    <td th:text="${auditor.nome}">João Silva</td>
+                    <td th:text="${auditor.totalAuditorias}">12</td>
+                    <td>
+                        <div class="flex items-center">
+                            <span th:text="${auditor.aderenciaMedia + '%'}">89%</span>
+                            <div class="ml-2 w-16 bg-muted rounded-full h-2">
+                                <div class="bg-primary h-2 rounded-full"
+                                     th:style="'width: ' + ${auditor.aderenciaMedia} + '%'"></div>
+                            </div>
+                        </div>
+                    </td>
+                    <td th:text="${auditor.ncsIdentificadas}">8</td>
+                    <td th:text="${auditor.tempoMedio + ' dias'}">5.2 dias</td>
+                    <td>
+                                <span class="status-badge"
+                                      th:classappend="${auditor.avaliacao == 'EXCELENTE'} ? 'status-approved' :
+                                                     (${auditor.avaliacao == 'BOM'} ? 'status-in-progress' : 'status-pending')"
+                                      th:text="${auditor.avaliacao}">Excelente</span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<script>
+    // Gráfico de Aderência por Processo
+    const aderenciaProcessoCtx = document.getElementById('aderenciaProcessoChart').getContext('2d');
+    new Chart(aderenciaProcessoCtx, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
+            datasets: [{
+                label: 'Compras',
+                data: [85, 87, 89, 86, 90, 87],
+                borderColor: 'rgb(22, 78, 99)',
+                backgroundColor: 'rgba(22, 78, 99, 0.1)',
+                tension: 0.1
+            }, {
+                label: 'Vendas',
+                data: [78, 82, 85, 83, 88, 85],
+                borderColor: 'rgb(8, 145, 178)',
+                backgroundColor: 'rgba(8, 145, 178, 0.1)',
+                tension: 0.1
+            }, {
+                label: 'Produção',
+                data: [92, 89, 91, 88, 93, 90],
+                borderColor: 'rgb(236, 72, 153)',
+                backgroundColor: 'rgba(236, 72, 153, 0.1)',
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100
+                }
+            }
+        }
+    });
+
+    // Gráfico de NCs por Criticidade
+    const ncCriticidadeCtx = document.getElementById('ncCriticidadeChart').getContext('2d');
+    new Chart(ncCriticidadeCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Baixa', 'Média', 'Alta', 'Crítica'],
+            datasets: [{
+                data: [5, 8, 12, 3],
+                backgroundColor: [
+                    'rgb(34, 197, 94)',
+                    'rgb(234, 179, 8)',
+                    'rgb(249, 115, 22)',
+                    'rgb(239, 68, 68)'
+                ]
+            }]
+        },
+        options: {
+            responsive: true
+        }
+    });
+
+    // Gráfico de Status das NCs
+    const ncStatusCtx = document.getElementById('ncStatusChart').getContext('2d');
+    new Chart(ncStatusCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Abertas', 'Em Tratamento', 'Resolvidas', 'Fechadas'],
+            datasets: [{
+                label: 'Quantidade',
+                data: [15, 8, 12, 42],
+                backgroundColor: [
+                    'rgb(239, 68, 68)',
+                    'rgb(234, 179, 8)',
+                    'rgb(34, 197, 94)',
+                    'rgb(107, 114, 128)'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    function exportarRelatorio() {
+        window.print();
+    }
+
+    function gerarRelatorio() {
+        // Implementar lógica para gerar relatório personalizado
+        alert('Funcionalidade de geração de relatório será implementada');
+    }
+</script>
+</body>
+</html>
