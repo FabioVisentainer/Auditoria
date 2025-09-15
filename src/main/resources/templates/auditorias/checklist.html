@@ -1,300 +1,73 @@
 <!DOCTYPE html>
-<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org" xmlns:x-bind="http://www.w3.org/1999/xhtml">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Checklist de Auditoria - Sistema de Auditoria</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="/css/globals.css">
-    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <title>Checklist de Auditoria</title>
+    <link rel="stylesheet" href="/css/styles.css" /> <!-- se tiver -->
 </head>
-<body class="bg-background text-foreground">
-<div th:replace="layout :: nav"></div>
+<body>
+<h1>Checklist de Auditoria</h1>
 
-<main class="max-w-4xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-    <!-- Header -->
-    <div class="mb-8">
-        <div class="flex items-center mb-4">
-            <a href="/auditorias" class="text-primary hover:text-primary/80 mr-4">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                </svg>
-            </a>
-            <h1 class="text-3xl font-bold text-foreground">Checklist de Auditoria</h1>
-        </div>
-        <div class="audit-card p-4">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                    <span class="text-sm text-muted-foreground">Processo:</span>
-                    <p class="font-medium" th:text="${auditoria.processo}">Processo de Compras</p>
-                </div>
-                <div>
-                    <span class="text-sm text-muted-foreground">Auditor:</span>
-                    <p class="font-medium" th:text="${auditoria.auditor}">João Silva</p>
-                </div>
-                <div>
-                    <span class="text-sm text-muted-foreground">Data:</span>
-                    <p class="font-medium" th:text="${#dates.format(auditoria.data, 'dd/MM/yyyy')}">15/03/2024</p>
-                </div>
-            </div>
-        </div>
+<form th:action="@{/checklist/save}" method="post">
+    <div>
+        <label>Nome do Checklist:</label>
+        <input type="text" name="nomeChecklist" th:value="${checklist.nomeChecklist}" required />
     </div>
 
-    <!-- Progress Bar -->
-    <div class="mb-8">
-        <div class="flex justify-between text-sm text-muted-foreground mb-2">
-            <span>Progresso do Checklist</span>
-            <span th:text="${progresso + '% concluído'}" x-text="progress + '% concluído'">75% concluído</span>
-        </div>
-        <div class="w-full bg-muted rounded-full h-2">
-            <div class="bg-primary h-2 rounded-full transition-all duration-300"
-                 th:style="'width: ' + ${progresso} + '%'"
-                 x-bind:style="'width: ' + progress + '%'"></div>
-        </div>
+    <div>
+        <label>Nome do Auditor:</label>
+        <input type="text" name="nomeAuditor" th:value="${checklist.nomeAuditor}" required />
     </div>
 
-    <!-- Checklist Form -->
-    <form th:action="@{/auditorias/{id}/checklist(id=${auditoria.id})}" method="post"
-          x-data="checklistForm()" @submit.prevent="submitForm">
+    <hr/>
 
-        <!-- Seção 1: Documentação -->
-        <div class="audit-card mb-6" x-data="{ expanded: true }">
-            <div class="p-4 border-b border-border">
-                <button type="button" @click="expanded = !expanded"
-                        class="flex justify-between items-center w-full text-left">
-                    <h3 class="text-lg font-medium text-card-foreground">1. Documentação</h3>
-                    <svg class="w-5 h-5 transform transition-transform"
-                         :class="expanded ? 'rotate-180' : ''"
-                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                    </svg>
-                </button>
-            </div>
+    <div th:each="frase, iterStat : ${frases}">
+        <h3 th:text="${frase.frase}">Texto da Frase</h3>
 
-            <div x-show="expanded" class="p-6 space-y-4">
-                <div class="checklist-item" th:each="item, iterStat : ${checklist.documentacao}">
-                    <div class="flex items-start space-x-3">
-                        <div class="flex items-center space-x-2 mt-1">
-                            <input type="radio" th:name="'doc_' + ${iterStat.index}" value="CONFORME"
-                                   class="text-primary focus:ring-primary"
-                                   th:checked="${item.status == 'CONFORME'}"
-                                   @change="updateProgress()">
-                            <label class="text-sm text-green-600">C</label>
-                        </div>
-                        <div class="flex items-center space-x-2 mt-1">
-                            <input type="radio" th:name="'doc_' + ${iterStat.index}" value="NAO_CONFORME"
-                                   class="text-destructive focus:ring-destructive"
-                                   th:checked="${item.status == 'NAO_CONFORME'}"
-                                   @change="updateProgress()">
-                            <label class="text-sm text-red-600">NC</label>
-                        </div>
-                        <div class="flex items-center space-x-2 mt-1">
-                            <input type="radio" th:name="'doc_' + ${iterStat.index}" value="NAO_APLICAVEL"
-                                   class="text-muted-foreground focus:ring-muted"
-                                   th:checked="${item.status == 'NAO_APLICAVEL'}"
-                                   @change="updateProgress()">
-                            <label class="text-sm text-gray-600">NA</label>
-                        </div>
-                        <div class="flex-1">
-                            <p class="text-foreground" th:text="${item.descricao}">
-                                Procedimentos operacionais estão documentados e atualizados?
-                            </p>
-                            <textarea th:name="'obs_doc_' + ${iterStat.index}"
-                                      placeholder="Observações (obrigatório para NC)"
-                                      class="mt-2 audit-input w-full h-20 text-sm"
-                                      th:text="${item.observacoes}"></textarea>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <!-- Id da frase -->
+        <input type="hidden" th:name="respostas[__${iterStat.index}__].idFrase.idFrase"
+               th:value="${frase.idFrase}" />
+
+        <div>
+            <label>Conformidade:</label>
+            <select th:name="respostas[__${iterStat.index}__].isConforme">
+                <option th:each="conformidade : ${T(com.qualidade.auditoria.model.enums.EnumConformidades).values()}"
+                        th:value="${conformidade}"
+                        th:text="${conformidade.descricao}">
+                </option>
+            </select>
         </div>
 
-        <!-- Seção 2: Processos -->
-        <div class="audit-card mb-6" x-data="{ expanded: true }">
-            <div class="p-4 border-b border-border">
-                <button type="button" @click="expanded = !expanded"
-                        class="flex justify-between items-center w-full text-left">
-                    <h3 class="text-lg font-medium text-card-foreground">2. Processos</h3>
-                    <svg class="w-5 h-5 transform transition-transform"
-                         :class="expanded ? 'rotate-180' : ''"
-                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                    </svg>
-                </button>
-            </div>
-
-            <div x-show="expanded" class="p-6 space-y-4">
-                <div class="checklist-item" th:each="item, iterStat : ${checklist.processos}">
-                    <div class="flex items-start space-x-3">
-                        <div class="flex items-center space-x-2 mt-1">
-                            <input type="radio" th:name="'proc_' + ${iterStat.index}" value="CONFORME"
-                                   class="text-primary focus:ring-primary"
-                                   th:checked="${item.status == 'CONFORME'}"
-                                   @change="updateProgress()">
-                            <label class="text-sm text-green-600">C</label>
-                        </div>
-                        <div class="flex items-center space-x-2 mt-1">
-                            <input type="radio" th:name="'proc_' + ${iterStat.index}" value="NAO_CONFORME"
-                                   class="text-destructive focus:ring-destructive"
-                                   th:checked="${item.status == 'NAO_CONFORME'}"
-                                   @change="updateProgress()">
-                            <label class="text-sm text-red-600">NC</label>
-                        </div>
-                        <div class="flex items-center space-x-2 mt-1">
-                            <input type="radio" th:name="'proc_' + ${iterStat.index}" value="NAO_APLICAVEL"
-                                   class="text-muted-foreground focus:ring-muted"
-                                   th:checked="${item.status == 'NAO_APLICAVEL'}"
-                                   @change="updateProgress()">
-                            <label class="text-sm text-gray-600">NA</label>
-                        </div>
-                        <div class="flex-1">
-                            <p class="text-foreground" th:text="${item.descricao}">
-                                Os processos são executados conforme documentado?
-                            </p>
-                            <textarea th:name="'obs_proc_' + ${iterStat.index}"
-                                      placeholder="Observações (obrigatório para NC)"
-                                      class="mt-2 audit-input w-full h-20 text-sm"
-                                      th:text="${item.observacoes}"></textarea>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div>
+            <label>Severidade:</label>
+            <select th:name="respostas[__${iterStat.index}__].classificacao">
+                <option th:each="severidade : ${T(com.qualidade.auditoria.model.enums.EnumSeveridade).values()}"
+                        th:value="${severidade}"
+                        th:text="${severidade.descricao}">
+                </option>
+            </select>
         </div>
 
-        <!-- Seção 3: Recursos -->
-        <div class="audit-card mb-6" x-data="{ expanded: true }">
-            <div class="p-4 border-b border-border">
-                <button type="button" @click="expanded = !expanded"
-                        class="flex justify-between items-center w-full text-left">
-                    <h3 class="text-lg font-medium text-card-foreground">3. Recursos</h3>
-                    <svg class="w-5 h-5 transform transition-transform"
-                         :class="expanded ? 'rotate-180' : ''"
-                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                    </svg>
-                </button>
-            </div>
-
-            <div x-show="expanded" class="p-6 space-y-4">
-                <div class="checklist-item" th:each="item, iterStat : ${checklist.recursos}">
-                    <div class="flex items-start space-x-3">
-                        <div class="flex items-center space-x-2 mt-1">
-                            <input type="radio" th:name="'rec_' + ${iterStat.index}" value="CONFORME"
-                                   class="text-primary focus:ring-primary"
-                                   th:checked="${item.status == 'CONFORME'}"
-                                   @change="updateProgress()">
-                            <label class="text-sm text-green-600">C</label>
-                        </div>
-                        <div class="flex items-center space-x-2 mt-1">
-                            <input type="radio" th:name="'rec_' + ${iterStat.index}" value="NAO_CONFORME"
-                                   class="text-destructive focus:ring-destructive"
-                                   th:checked="${item.status == 'NAO_CONFORME'}"
-                                   @change="updateProgress()">
-                            <label class="text-sm text-red-600">NC</label>
-                        </div>
-                        <div class="flex items-center space-x-2 mt-1">
-                            <input type="radio" th:name="'rec_' + ${iterStat.index}" value="NAO_APLICAVEL"
-                                   class="text-muted-foreground focus:ring-muted"
-                                   th:checked="${item.status == 'NAO_APLICAVEL'}"
-                                   @change="updateProgress()">
-                            <label class="text-sm text-gray-600">NA</label>
-                        </div>
-                        <div class="flex-1">
-                            <p class="text-foreground" th:text="${item.descricao}">
-                                Os recursos necessários estão disponíveis e adequados?
-                            </p>
-                            <textarea th:name="'obs_rec_' + ${iterStat.index}"
-                                      placeholder="Observações (obrigatório para NC)"
-                                      class="mt-2 audit-input w-full h-20 text-sm"
-                                      th:text="${item.observacoes}"></textarea>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div>
+            <label>Responsável:</label>
+            <span th:text="${frase.responsavel.setor}"></span>
+            <input type="hidden" th:name="respostas[__${iterStat.index}__].responsavel"
+                   th:value="${frase.responsavel}" />
         </div>
 
-        <!-- Resumo e Ações -->
-        <div class="audit-card p-6">
-            <h3 class="text-lg font-medium text-card-foreground mb-4">Resumo da Auditoria</h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div class="text-center p-4 bg-green-50 rounded-lg">
-                    <div class="text-2xl font-bold text-green-600" x-text="conformes">12</div>
-                    <div class="text-sm text-green-600">Conformes</div>
-                </div>
-                <div class="text-center p-4 bg-red-50 rounded-lg">
-                    <div class="text-2xl font-bold text-red-600" x-text="naoConformes">3</div>
-                    <div class="text-sm text-red-600">Não Conformes</div>
-                </div>
-                <div class="text-center p-4 bg-blue-50 rounded-lg">
-                    <div class="text-2xl font-bold text-blue-600" x-text="aderencia + '%'">80%</div>
-                    <div class="text-sm text-blue-600">Aderência</div>
-                </div>
-            </div>
-
-            <div class="mb-6">
-                <label class="block text-sm font-medium text-card-foreground mb-2">Observações Gerais</label>
-                <textarea name="observacoesGerais"
-                          class="audit-input w-full h-32"
-                          placeholder="Observações gerais sobre a auditoria..."
-                          th:text="${auditoria.observacoesGerais}"></textarea>
-            </div>
-
-            <div class="flex justify-between">
-                <button type="button" class="audit-btn-secondary">Salvar Rascunho</button>
-                <div class="space-x-4">
-                    <button type="button" class="audit-btn-secondary">Cancelar</button>
-                    <button type="submit" class="audit-btn-primary">Finalizar Auditoria</button>
-                </div>
-            </div>
+        <div>
+            <label>Resolução Indicada:</label>
+            <input type="text" th:name="respostas[__${iterStat.index}__].resolucaoIndicadaca" />
         </div>
-    </form>
-</main>
 
-<script>
-    function checklistForm() {
-        return {
-            progress: 0,
-            conformes: 0,
-            naoConformes: 0,
-            aderencia: 0,
+        <div>
+            <input type="hidden" th:name="respostas[__${iterStat.index}__].isResolvido" value="false" />
+        </div>
 
-            updateProgress() {
-                const radios = document.querySelectorAll('input[type="radio"]:checked');
-                const total = document.querySelectorAll('input[type="radio"][value="CONFORME"]').length;
+        <hr/>
+    </div>
 
-                this.conformes = document.querySelectorAll('input[type="radio"][value="CONFORME"]:checked').length;
-                this.naoConformes = document.querySelectorAll('input[type="radio"][value="NAO_CONFORME"]:checked').length;
-                const naAplicaveis = document.querySelectorAll('input[type="radio"][value="NAO_APLICAVEL"]:checked').length;
-
-                const totalAplicaveis = total - naAplicaveis;
-                this.aderencia = totalAplicaveis > 0 ? Math.round((this.conformes / totalAplicaveis) * 100) : 0;
-                this.progress = Math.round((radios.length / total) * 100);
-            },
-
-            submitForm() {
-                // Validação antes do envio
-                const naoConformes = document.querySelectorAll('input[type="radio"][value="NAO_CONFORME"]:checked');
-                let valid = true;
-
-                naoConformes.forEach(radio => {
-                    const name = radio.name.replace('doc_', 'obs_doc_').replace('proc_', 'obs_proc_').replace('rec_', 'obs_rec_');
-                    const textarea = document.querySelector(`textarea[name="${name}"]`);
-                    if (!textarea.value.trim()) {
-                        textarea.classList.add('border-destructive');
-                        valid = false;
-                    } else {
-                        textarea.classList.remove('border-destructive');
-                    }
-                });
-
-                if (valid) {
-                    document.querySelector('form').submit();
-                } else {
-                    alert('Por favor, preencha as observações para todos os itens não conformes.');
-                }
-            }
-        }
-    }
-</script>
+    <button type="submit">Salvar Checklist</button>
+</form>
 </body>
 </html>
