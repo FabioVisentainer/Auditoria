@@ -3,6 +3,7 @@ package com.qualidade.auditoria.controller;
 import com.qualidade.auditoria.model.Checklist;
 import com.qualidade.auditoria.model.Frases;
 import com.qualidade.auditoria.model.Respostas;
+import com.qualidade.auditoria.repository.ChecklistRepository;
 import com.qualidade.auditoria.repository.FrasesRepository;
 import com.qualidade.auditoria.repository.RespostasRepository;
 //import com.qualidade.auditoria.service.EmailService;
@@ -31,6 +32,9 @@ public class ChecklistController {
     @Autowired
     private RespostasRepository respostasRepository;
 
+    @Autowired
+    private ChecklistRepository checklistRepository;
+
 //    @Autowired
 //    private EmailService emailService; // injeta o serviço
 
@@ -45,19 +49,23 @@ public class ChecklistController {
 
     @PostMapping("/save")
     public String saveResposta(Checklist checklist, List<Respostas> respostas) {
+        // Salva o checklist primeiro (agora ele terá um ID válido)
+        Checklist checklistSalvo = checklistRepository.save(checklist);
+
         for (Respostas r : respostas) {
-            r.setIdCheckList(checklist);
+            r.setIdCheckList(checklistSalvo); // associa o checklist já salvo
             respostasRepository.save(r);
 
             // dispara email para o responsável usando o Enum
-            String destinatario = r.getIdResponsavelAud().getEmail(); // seu getEmail funciona aqui
+            String destinatario = r.getIdResponsavelAud().getEmail();
             String assunto = "Nova resposta registrada no checklist";
             String mensagem = "Frase: " + r.getIdFrase().getFrase() +
                     "\nClassificação: " + r.getClassificacao().getDescricao() +
                     "\nConformidade: " + r.getIsConforme().getDescricao();
 
-           // emailService.enviarEmail(destinatario, assunto, mensagem);
+            // emailService.enviarEmail(destinatario, assunto, mensagem);
         }
+
         return "redirect:/checklist";
     }
 }

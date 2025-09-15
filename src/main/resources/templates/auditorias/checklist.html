@@ -24,6 +24,7 @@
     <div th:each="frase, iterStat : ${frases}">
         <h3 th:text="${frase.frase}">Texto da Frase</h3>
 
+        <!-- Id da frase -->
         <input type="hidden" th:name="respostas[__${iterStat.index}__].idFrase.idFrase"
                th:value="${frase.idFrase}" />
 
@@ -49,12 +50,9 @@
 
         <div>
             <label>Responsável:</label>
-            <select th:name="respostas[__${iterStat.index}__].idResponsavelAud">
-                <option th:each="resp : ${T(com.qualidade.auditoria.model.enums.EnumResponsaveis).values()}"
-                        th:value="${resp}"
-                        th:text="${resp.setor}">
-                </option>
-            </select>
+            <span th:text="${frase.responsavel.setor}"></span>
+            <input type="hidden" th:name="respostas[__${iterStat.index}__].responsavel"
+                   th:value="${frase.responsavel}" />
         </div>
 
         <div>
@@ -63,8 +61,7 @@
         </div>
 
         <div>
-            <label>Está Resolvido?</label>
-            <input type="checkbox" th:name="respostas[__${iterStat.index}__].isResolvido" value="true" />
+            <input type="hidden" th:name="respostas[__${iterStat.index}__].isResolvido" value="false" />
         </div>
 
         <hr/>
