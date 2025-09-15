@@ -54,4 +54,20 @@ public class DashboardController {
         model.addAttribute("resumos", resumos);
         return "dashboard";
     }
+
+    @GetMapping("/checklist/detalhes")
+    public String detalhesChecklist(Integer id, Model model) {
+        Checklist checklist = checklistRepository.findById(id).orElse(null);
+        if (checklist != null) {
+            // Filtra apenas respostas não conformes
+            List<Respostas> naoConformes = checklist.getRespostas().stream()
+                    .filter(r -> r.getIsConforme() != null && r.getIsConforme().name().equals("NAO_CONFORME"))
+                    .toList();
+
+            model.addAttribute("checklist", checklist);
+            model.addAttribute("naoConformes", naoConformes);
+        }
+        return "detalhes";
+    }
+
 }
