@@ -40,8 +40,10 @@
 
 <div class="sidebar">
     <h4 class="text-center">Auditoria</h4>
-    <a href="/">Início</a>
+    <a href="/home">Início</a>
     <a href="/checklist">Checklists</a>
+    <a href="/auditores">Auditores</a>
+    <a href="/dashboard">Relatórios</a>
 </div>
 
 <div class="content">
@@ -56,8 +58,20 @@
     <div th:each="resposta : ${naoConformes}" class="card-item">
         <p><strong>Frase:</strong> <span th:text="${resposta.frase.frase}">Descrição da frase</span></p>
         <p><strong>Severidade:</strong> <span th:text="${resposta.classificacao}">Alta/Média/Baixa</span></p>
-        <p><strong>Responsável:</strong> <span th:text="${resposta.responsavelAud}">Nome do responsável</span></p>
+        <p><strong>Responsável: </strong><span th:text="${resposta.responsavelAud.setor}">Nome do responsável</span></p>
+        <p><strong>Data para a resolução:</strong>
+            <span th:text="${#temporals.format(resposta.dataResolucao, 'dd/MM/yyyy')}">Data para a resolução</span>
+        </p>
         <p><strong>Resolução Indicada:</strong> <span th:text="${resposta.resolucaoIndicada}">Texto da resolução</span></p>
+
+        <!-- Botões -->
+        <form th:action="@{/dashboard/checklist/resolver/{idResposta}(idResposta=${resposta.id})}" method="post" style="display:inline-block;">
+            <button type="submit" class="btn btn-success btn-sm">Resolvido</button>
+        </form>
+
+        <form th:action="@{/dashboard/checklist/naoResolvido/{idResposta}(idResposta=${resposta.id})}" method="post" style="display:inline-block;">
+            <button type="submit" class="btn btn-danger btn-sm">Não Resolvido</button>
+        </form>
     </div>
 </div>
 

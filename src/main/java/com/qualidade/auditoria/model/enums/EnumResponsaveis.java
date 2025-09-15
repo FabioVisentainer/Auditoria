@@ -1,9 +1,9 @@
 package com.qualidade.auditoria.model.enums;
 
 public enum EnumResponsaveis {
-    ENCTINT("Encarregado Tinturaria", "projetoauditora24@gmail.com"),
-    ENCPCP("Encarregado PCP", "projetoauditora24@gmail.com"),
-    GERPRO("Gerente de Produção", "projetoauditora24@gmail.com");
+    ENCTINT("Encarregado Tinturaria", "pzakrzevski@gmail.com"),
+    ENCPCP("Encarregado PCP", "pzakrzevski@gmail.com"),
+    GERPRO("Gerente de Produção", "pzakrzevski@gmail.com");
 
     private final String setor;
     private final String email;

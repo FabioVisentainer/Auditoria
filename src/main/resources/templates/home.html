@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Início - Auditoria</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .sidebar {
+            height: 100vh;
+            width: 250px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: #343a40;
+            padding-top: 60px;
+            color: white;
+        }
+        .sidebar a {
+            padding: 15px 20px;
+            display: block;
+            color: white;
+            text-decoration: none;
+        }
+        .sidebar a:hover {
+            background-color: #495057;
+        }
+        .content {
+            margin-left: 250px;
+            padding: 30px;
+        }
+        .card-custom {
+            border-radius: 10px;
+            box-shadow: 0px 2px 6px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<div class="sidebar">
+    <h4 class="text-center">Auditoria</h4>
+    <a href="/home">Início</a>
+    <a href="/checklist">Checklists</a>
+    <a href="/auditores">Auditores</a>
+    <a href="/dashboard">Relatórios</a>
+</div>
+
+<!-- Main Content -->
+<div class="content">
+    <div class="container-fluid">
+        <h1 class="mb-4">Bem-vindo à Aplicação de Auditoria</h1>
+        <p class="text-muted">Aqui você pode gerenciar checklists, acompanhar conformidades e visualizar relatórios.</p>
+
+        <div class="row">
+            <!-- Card Checklists -->
+            <div class="col-md-4 mb-4">
+                <div class="card card-custom">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Checklists</h5>
+                        <p class="card-text">Crie e gerencie checklists de auditoria de forma simples.</p>
+                        <a href="/checklist" class="btn btn-primary">Acessar</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card Auditores -->
+            <div class="col-md-4 mb-4">
+                <div class="card card-custom">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Auditores</h5>
+                        <p class="card-text">Veja a lista de auditores e responsáveis cadastrados.</p>
+                        <a href="/auditores" class="btn btn-secondary">Consultar</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card Relatórios -->
+            <div class="col-md-4 mb-4">
+                <div class="card card-custom">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Relatórios</h5>
+                        <p class="card-text">Visualize métricas e resultados das auditorias.</p>
+                        <a href="/dashboard" class="btn btn-success">Ver Relatórios</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sobre o sistema -->
+        <div class="card card-custom mt-4">
+            <div class="card-body">
+                <h5>Sobre a Aplicação</h5>
+                <p>
+                    Este sistema foi desenvolvido para facilitar o processo de auditoria,
+                    permitindo o acompanhamento de conformidades, notificações por e-mail para responsáveis
+                    e a geração de relatórios automatizados.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

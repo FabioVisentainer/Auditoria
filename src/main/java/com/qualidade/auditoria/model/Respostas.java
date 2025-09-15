@@ -8,6 +8,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -44,4 +46,18 @@ public class Respostas {
 
     @Column(nullable = false)
     private boolean resolvido = false;
+
+    private LocalDate dataResolucao;
+
+
+    public void calcularDataResolucao() {
+        if (this.classificacao != null) {
+            LocalDate hoje = LocalDate.now();
+            switch (this.classificacao) {
+                case BAIXA -> this.dataResolucao = hoje.plusDays(3);
+                case MEDIA -> this.dataResolucao = hoje.plusDays(2);
+                case ALTA -> this.dataResolucao = hoje.plusDays(1);
+            }
+        }
+    }
 }

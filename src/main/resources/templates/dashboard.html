@@ -32,9 +32,15 @@
         }
         .status-badge {
             padding: 5px 10px;
-            border-radius: 5px;
-            background-color: #28a745;
+            border-radius: 12px;
+            font-weight: bold;
             color: white;
+        }
+        .badge-green {
+            background-color: #28a745;
+        }
+        .badge-red {
+            background-color: #dc3545;
         }
         .progress {
             height: 20px;
@@ -55,10 +61,10 @@
 <!-- Sidebar -->
 <div class="sidebar">
     <h4 class="text-center">Auditoria</h4>
-    <a href="#">Início</a>
+    <a href="/home">Início</a>
     <a href="/checklist">Checklists</a>
-    <a href="#">Auditores</a>
-    <a href="/">Relatórios</a>
+    <a href="/auditores">Auditores</a>
+    <a href="/dashboard">Relatórios</a>
 </div>
 
 <!-- Main Content -->
@@ -69,8 +75,8 @@
         <div class="d-flex justify-content-between align-items-center mb-2">
             <h5 th:text="${resumo.checklist.nomeChecklist}">Checklist Nome</h5>
             <span class="status-badge"
-                  th:text="${resumo.conformes > 0 && resumo.naoConformes == 0 ? 'Conforme' : 'Não Conforme'}">
-                Conforme
+                  th:text="${resumo.conformes > 0 && resumo.naoConformes == 0 ? 'Conforme' : 'Não Conforme'}"
+                  th:classappend="${resumo.conformes > 0 && resumo.naoConformes == 0} ? ' badge-green' : ' badge-red'">
             </span>
         </div>
 
@@ -101,7 +107,7 @@
         </div>
 
         <div class="mt-2">
-            <a th:href="@{/checklist/detalhes(id=${resumo.checklist.id})}" class="btn btn-secondary btn-sm">Visualizar Detalhes</a>
+            <a th:href="@{/dashboard/checklist/detalhes(id=${resumo.checklist.id})}" class="btn btn-secondary btn-sm">Visualizar Detalhes</a>
 
         </div>
     </div>

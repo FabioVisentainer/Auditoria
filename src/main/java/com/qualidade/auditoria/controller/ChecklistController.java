@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.ui.Model;
 
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Controller
@@ -23,9 +24,6 @@ public class ChecklistController {
 
     @Autowired
     private FrasesRepository frasesRepository;
-
-    @Autowired
-    private RespostasRepository respostasRepository;
 
     @Autowired
     private ChecklistRepository checklistRepository;
@@ -48,19 +46,24 @@ public class ChecklistController {
         if (checklist.getRespostas() != null) {
             for (Respostas r : checklist.getRespostas()) {
                 r.setChecklist(checklist);
+                if (r.getIsConforme() == EnumConformidades.NAO_CONFORME) {
+                    r.calcularDataResolucao();
+                }
             }
         }
-
         checklistRepository.save(checklist); // salva checklist + respostas
 
-        // Envio de e-mail (opcional)
+        // Envio de e-mail
         if (checklist.getRespostas() != null) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
             for (Respostas r : checklist.getRespostas()) {
                 if (r.getIsConforme() == EnumConformidades.NAO_CONFORME) {
                     String destinatario = r.getResponsavelAud().getEmail();
                     String assunto = "Nova resposta NÃO conforme registrada no checklist";
+                    String dataResolucaoFormatada = r.getDataResolucao().format(formatter);
                     String mensagem = "Frase: " + r.getFrase().getFrase() +
                             "\nClassificação: " + r.getClassificacao().getDescricao() +
+                            "\nData para a resolução: " + dataResolucaoFormatada +
                             "\nConformidade: " + r.getIsConforme().getDescricao();
                     emailService.enviarEmail(destinatario, assunto, mensagem);
                 }
