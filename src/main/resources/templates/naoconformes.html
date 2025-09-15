@@ -1,0 +1,47 @@
+<!--
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Não Conformidades</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<nav class="sidebar">
+    <h1 class="logo">AuditoriaPRO</h1>
+    <ul class="nav-links">
+        <li><a href="auditoria/checklist.html">Checklist</a></li>
+        <li><a href="dashboard.html">Resumo</a></li>
+    </ul>
+</nav>
+
+<div class="content">
+    <h2>Lista de Não Conformidades</h2>
+
+    <table class="nc-table">
+        <thead>
+        <tr>
+            <th>Frase</th>
+            <th>Responsável</th>
+            <th>Setor</th>
+            <th>Prazo</th>
+        </tr>
+        </thead>
+        <tbody>
+
+        <tr th:each="nc : ${naoConformidades}">
+            <td th:text="${nc.frase}">Exemplo frase</td>
+            <td th:text="${nc.responsavel}">Maria</td>
+            <td th:text="${nc.setor}">Qualidade</td>
+            <td th:text="${nc.prazo}">2025-09-30</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div class="voltar">
+        <a href="dashboard.html" class="btn">⬅ Voltar</a>
+    </div>
+</div>
+</body>
+</html>
