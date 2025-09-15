@@ -8,9 +8,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
-import java.util.Date;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -20,36 +17,31 @@ public class Respostas {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer idResposta;
+    private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "id_checklist")
-    private Checklist idCheckList;
+    @JoinColumn(name = "id_checklist", nullable = false)
+    private Checklist checklist;
 
     @ManyToOne
-    @JoinColumn(name = "id_frase")
-    private Frases idFrase;
+    @JoinColumn(name = "id_frase", nullable = false)
+    private Frases frase;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 50)
     private EnumConformidades isConforme;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 50)
     private EnumSeveridade classificacao;
 
-    private LocalDate dataResposta;
-
     @Enumerated(EnumType.STRING)
-    private EnumResponsaveis idResponsavelAud;
+    @Column(nullable = false, length = 50)
+    private EnumResponsaveis responsavelAud;
 
-    private String resolucaoIndicadaca;
+    @Column(length = 500)
+    private String resolucaoIndicada;
 
-    private Boolean isResolvido;
-
-    @PrePersist
-    @PreUpdate
-    public void calcularDataResposta() {
-        if (this.classificacao != null) {
-            this.dataResposta = this.classificacao.calcularDataResposta();
-        }
-    }
+    @Column(nullable = false)
+    private boolean resolvido = false;
 }

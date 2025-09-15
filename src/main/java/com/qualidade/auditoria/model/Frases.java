@@ -6,6 +6,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -14,13 +17,20 @@ import lombok.NoArgsConstructor;
 public class Frases {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // deixa como autoIncrement
-    private Integer idFrase;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
 
+    @Column(nullable = false, length = 500)
     private String frase;
 
-    @Enumerated(EnumType.STRING) // salva o nome do enum no banco (ex: TI, RH)
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 50)
     private EnumResponsaveis responsavel;
 
+    @OneToMany(
+            mappedBy = "frase",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<Respostas> respostas = new ArrayList<>();
 }
-
